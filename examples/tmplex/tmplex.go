@@ -23,7 +23,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/01org/intel/tfortools"
+	"github.com/intel/tfortools"
 )
 
 type stock struct {
