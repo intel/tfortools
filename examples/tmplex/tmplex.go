@@ -23,7 +23,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/01org/ciao/templateutils"
+	"github.com/01org/intel/tfortools"
 )
 
 type stock struct {
@@ -54,17 +54,17 @@ var fictionalStocks = []stock{
 
 var code string
 
-var cfg *templateutils.Config
+var cfg *tfortools.Config
 
 func init() {
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: %s -f [stocks]\n", os.Args[0])
 		flag.PrintDefaults()
 		fmt.Fprintln(os.Stderr)
-		fmt.Fprintln(os.Stderr, templateutils.GenerateUsageDecorated("f", fictionalStocks, cfg))
+		fmt.Fprintln(os.Stderr, tfortools.GenerateUsageDecorated("f", fictionalStocks, cfg))
 	}
 	flag.StringVar(&code, "f", "", "string containing the template code to execute")
-	cfg = templateutils.NewConfig(templateutils.OptAllFns)
+	cfg = tfortools.NewConfig(tfortools.OptAllFns)
 
 	if err := cfg.AddCustomFn(sumVolume, "sumVolume", sumVolumeHelp); err != nil {
 		panic(err)
@@ -83,7 +83,7 @@ const sumVolumeHelp = `- sumVolume computes the total volume all stocks in a []s
 
 func stocks() error {
 	if code != "" {
-		err := templateutils.OutputToTemplate(os.Stdout, "stocks", code, fictionalStocks, cfg)
+		err := tfortools.OutputToTemplate(os.Stdout, "stocks", code, fictionalStocks, cfg)
 		if err != nil {
 			return fmt.Errorf("Unable to execute template : %v", err)
 		}

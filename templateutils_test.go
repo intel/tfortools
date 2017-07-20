@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package templateutils
+package tfortools
 
 import (
 	"bytes"
@@ -31,7 +31,7 @@ var templateUsageTests = []struct {
 	expected string
 }{
 	{int(0), "int"},
-	{testint(0), "templateutils.testint"},
+	{testint(0), "tfortools.testint"},
 	{[]int{}, "[]int"},
 	{false, "bool"},
 	{[5]int{}, "[5]int"},

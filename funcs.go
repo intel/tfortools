@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package templateutils
+package tfortools
 
 import (
 	"bytes"

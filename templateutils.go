@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-// Package templateutils provides a set of functions that are designed to
+// Package tfortools provides a set of functions that are designed to
 // make it easier for developers to add template based scripting to their
 // command line tools.
 //
@@ -59,7 +59,7 @@
 //
 // The functions head, sort, tables and col are provided by this package.
 //
-package templateutils
+package tfortools
 
 import (
 	"bytes"
@@ -101,7 +101,7 @@ type funcHelpInfo struct {
 
 // Config is used to specify which functions should be added Go's template
 // language.  It's not necessary to create a Config option.  Nil can be passed
-// to all templateutils functions that take a Context object indicating the
+// to all tfortools functions that take a Context object indicating the
 // default behaviour is desired.  However, if you wish to restrict the
 // number of functions added to Go's template language or you want to add your
 // own functions, you'll need to create a Config object.  This can be done
@@ -118,7 +118,7 @@ func (c *Config) Swap(i, j int)      { c.funcHelp[i], c.funcHelp[j] = c.funcHelp
 func (c *Config) Less(i, j int) bool { return c.funcHelp[i].index < c.funcHelp[j].index }
 
 // AddCustomFn adds a custom function to the template language understood by
-// templateutils.CreateTemplate and templateutils.OutputToTemplate.  The function
+// tfortools.CreateTemplate and tfortools.OutputToTemplate.  The function
 // implementation is provided by fn, its name, i.e., the name used to invoke the
 // function in a program, is provided by name and the help for the function is
 // provided by helpText.  An error will be returned if a function with the same
@@ -548,13 +548,13 @@ func OptDescribe(c *Config) {
 // none of the functions defined in this package are enabled in the resulting Config
 // object.  To control which functions get added specify some options, e.g.,
 //
-//  ctx := templateutils.NewConfig(templateutils.OptHead, templateutils.OptTail)
+//  ctx := tfortools.NewConfig(tfortools.OptHead, tfortools.OptTail)
 //
 // creates a new Config object that enables the 'head' and 'tail' functions only.
 //
 // To add all the functions, use the OptAllFNs options, e.g.,
 //
-//    ctx := templateutils.NewConfig(templateutils.OptAllFNs)
+//    ctx := tfortools.NewConfig(tfortools.OptAllFNs)
 func NewConfig(options ...func(*Config)) *Config {
 	c := &Config{
 		funcMap: make(template.FuncMap),
@@ -570,7 +570,7 @@ func NewConfig(options ...func(*Config)) *Config {
 // TemplateFunctionHelp generates formatted documentation that describes the
 // additional functions that the Config object c adds to Go's templating language.
 // If c is nil, documentation is generated for all functions provided by
-// templateutils.
+// tfortools.
 func TemplateFunctionHelp(c *Config) string {
 	b := &bytes.Buffer{}
 	_, _ = b.WriteString("Some new functions have been added to Go's template language\n\n")
@@ -586,7 +586,7 @@ func TemplateFunctionHelp(c *Config) string {
 // the name parameter.  The results of the execution are output to w.
 // The functions enabled in the cfg parameter will be made available to the
 // template source code specified in tmplSrc.  If cfg is nil, all the
-// additional functions provided by templateutils will be enabled.
+// additional functions provided by tfortools will be enabled.
 func OutputToTemplate(w io.Writer, name, tmplSrc string, obj interface{}, cfg *Config) (err error) {
 	t, err := template.New(name).Funcs(getFuncMap(cfg)).Parse(tmplSrc)
 	if err != nil {
@@ -602,7 +602,7 @@ func OutputToTemplate(w io.Writer, name, tmplSrc string, obj interface{}, cfg *C
 // tmplSrc parameter and whose name is given by the name parameter. The functions
 // enabled in the cfg parameter will be made available to the template source code
 // specified in tmplSrc.  If cfg is nil, all the additional functions provided by
-// templateutils will be enabled.
+// tfortools will be enabled.
 func CreateTemplate(name, tmplSrc string, cfg *Config) (*template.Template, error) {
 	if tmplSrc == "" {
 		return nil, fmt.Errorf("template %s contains no source", name)
