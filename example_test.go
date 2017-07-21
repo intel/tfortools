@@ -376,17 +376,20 @@ func ExampleOptDescribe() {
 func ExampleConfig_AddCustomFn() {
 	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	cfg := NewConfig(OptAllFns)
-	cfg.AddCustomFn(func(n []int) int {
+	err := cfg.AddCustomFn(func(n []int) int {
 		sum := 0
 		for _, num := range n {
 			sum += num
 		}
 		return sum
 	}, "sum", "- sum \"Returns\" the sum of a slice of integers")
+	if err != nil {
+		panic(err)
+	}
 
 	// Print the sum of a slice of numbers
 	script := `{{println (sum .)}}`
-	if err := OutputToTemplate(os.Stdout, "sums", script, nums, cfg); err != nil {
+	if err = OutputToTemplate(os.Stdout, "sums", script, nums, cfg); err != nil {
 		panic(err)
 	}
 	// output:

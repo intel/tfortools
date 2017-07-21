@@ -154,9 +154,13 @@ func TestOptAllFns(t *testing.T) {
 	oldMapLen := len(funcMap)
 	oldSliceLen := len(funcHelpSlice)
 	cfg := NewConfig(OptAllFns)
-	cfg.AddCustomFn(func() int {
+	err := cfg.AddCustomFn(func() int {
 		return 0
 	}, "zero", "- zero \"Returns\" zero")
+	if err != nil {
+		t.Errorf("AddCustomFn failed with err : %v", err)
+	}
+
 	if oldMapLen != len(funcMap) {
 		t.Errorf("Global funcmap should not be modified")
 	}
