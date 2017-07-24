@@ -227,7 +227,7 @@ func filterField(fnName string, obj interface{}, field, val string, cmp func(str
 
 		f := findField(fieldPath, v)
 
-		strVal := fmt.Sprintf("%v", f.Interface())
+		strVal := fmt.Sprintf("%#v", f.Interface())
 		if cmp(strVal, val) {
 			filtered = reflect.Append(filtered, list.Index(i))
 		}
@@ -289,7 +289,7 @@ func selectField(obj interface{}, field string) string {
 
 		f := findField(fieldPath, v)
 
-		fmt.Fprintf(&b, "%v\n", f.Interface())
+		fmt.Fprintf(&b, "%#v\n", f.Interface())
 	}
 
 	return string(b.Bytes())
@@ -347,7 +347,7 @@ func createTable(v reflect.Value, minWidth, tabWidth, padding int, headings []ta
 	for i := 0; i < v.Len(); i++ {
 		el := v.Index(i)
 		for _, h := range headings {
-			fmt.Fprintf(w, "%v\t", el.Field(h.index).Interface())
+			fmt.Fprintf(w, "%#v\t", el.Field(h.index).Interface())
 		}
 		fmt.Fprintln(w)
 	}
