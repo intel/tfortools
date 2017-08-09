@@ -91,6 +91,7 @@ const (
 	helpHeadIndex
 	helpTailIndex
 	helpDescribeIndex
+	helpPromoteIndex
 	helpIndexCount
 )
 
@@ -540,6 +541,59 @@ func OptDescribe(c *Config) {
 	}
 	c.funcMap["describe"] = describe
 	c.funcHelp = append(c.funcHelp, funcHelpInfo{helpDescribe, helpDescribeIndex})
+}
+
+const helpPromote = `- 'promote' takes two arguments, a slice or an array of structures and a field
+  path.  It returns a new slice containing only the objects identified by the
+  field path.  The field path is a period separated list of structure field
+  names.  Promote can be useful to extract a set of objects deep within a data
+  structure into a new slice that can be passed to other functions, e.g., table.
+  For example, given the following type
+ 
+   []struct {
+      uninteresting int
+      user struct {
+          credentials struct {
+              name string
+              password string
+          }
+      }
+  }
+
+  {{promote . "user.credentials"}}
+
+  returns a slice of credentials one for each element of the original top level
+  slice.
+`
+
+// OptPromote indicates that the 'promote' function should be enabled.
+// 'promote' takes two arguments, a slice or an array of structures and a field
+// path.  It returns a new slice containing only the objects identified by the
+// field path.  The field path is a period separated list of structure field
+// names.  Promote can be useful to extract a set of objects deep within a data
+// structure into a new slice that can be passed to other functions, e.g., table.
+// For example, given the following type
+//
+//  []struct {
+//      uninteresting int
+//      user struct {
+//          credentials struct {
+//              name string
+//              password string
+//          }
+//      }
+//  }
+//
+//  {{promote . "user.credentials"}}
+//
+// returns a slice of credentials one for each element of the original top level
+// slice.
+func OptPromote(c *Config) {
+	if _, ok := c.funcMap["promote"]; ok {
+		return
+	}
+	c.funcMap["promote"] = promote
+	c.funcHelp = append(c.funcHelp, funcHelpInfo{helpPromote, helpPromoteIndex})
 }
 
 // NewConfig creates a new Config object that can be passed to other functions

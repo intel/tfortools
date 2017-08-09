@@ -373,6 +373,37 @@ func ExampleOptDescribe() {
 	// }
 }
 
+func ExampleOptPromote() {
+	type cred struct {
+		Name     string
+		Password string
+	}
+
+	type u struct {
+		Credentials cred
+	}
+
+	data := []struct {
+		Uninteresting int
+		User          u
+	}{
+		{0, u{cred{"Marcus", "1234"}}},
+		{0, u{cred{"Gaius", "0000"}}},
+	}
+
+	// Create a new []cred containing the credentials embedded within data,
+	// iterate through this new slice printing out the names and passwords.
+	// The cred instances rooted at "User.Credentials" in the data object
+	// are promoted to the top level in the new slice.
+	script := `{{range (promote . "User.Credentials")}}{{printf "%s %s\n" .Name .Password}}{{end}}`
+	if err := OutputToTemplate(os.Stdout, "names", script, data, nil); err != nil {
+		panic(err)
+	}
+	// output:
+	// Marcus 1234
+	// Gaius 0000
+}
+
 func ExampleConfig_AddCustomFn() {
 	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	cfg := NewConfig(OptAllFns)

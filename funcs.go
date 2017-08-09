@@ -217,6 +217,21 @@ func findField(fieldPath []string, v reflect.Value) reflect.Value {
 	return f
 }
 
+func findFieldType(fnName string, fieldPath []string, t reflect.Type) reflect.Type {
+	f := t
+	for _, seg := range fieldPath {
+		sf, found := f.FieldByName(seg)
+		if !found {
+			fatalf(fnName, "Field %s not found", seg)
+		}
+		f = sf.Type
+		if f.Kind() == reflect.Ptr {
+			f = f.Elem()
+		}
+	}
+	return f
+}
+
 func filterField(fnName string, obj interface{}, field, val string, cmp func(string, string) bool) interface{} {
 	defer func() {
 		err := recover()
@@ -531,6 +546,43 @@ func tail(obj interface{}, count ...int) interface{} {
 	}
 	for i := start; i < val.Len(); i++ {
 		copy = reflect.Append(copy, val.Index(i))
+	}
+
+	return copy.Interface()
+}
+
+func promote(obj interface{}, field string) interface{} {
+	defer func() {
+		err := recover()
+		if err != nil {
+			fatalf("promote", "Invalid use of promote: %v", err)
+		}
+	}()
+
+	if len(strings.TrimSpace(field)) == 0 {
+		fatalf("promote", "Empty field specifier given")
+	}
+
+	fieldPath := strings.Split(field, ".")
+
+	val := getValue(obj)
+	assertCollectionOfStructs("promote", val)
+
+	ftype := val.Type().Elem()
+	if ftype.Kind() == reflect.Ptr {
+		ftype = ftype.Elem()
+	}
+	ftype = findFieldType("promote", fieldPath, ftype)
+
+	rows := val.Len()
+	copy := reflect.MakeSlice(reflect.SliceOf(ftype), 0, rows)
+	for i := 0; i < rows; i++ {
+		el := val.Index(i)
+		if el.Kind() == reflect.Ptr {
+			el = reflect.Indirect(el)
+		}
+		el = findField(fieldPath, el)
+		copy = reflect.Append(copy, el)
 	}
 
 	return copy.Interface()
