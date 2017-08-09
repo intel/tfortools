@@ -127,17 +127,25 @@ func (v *valueSorter) Len() int {
 	return v.val.Len()
 }
 
+func (v *valueSorter) index(i int) reflect.Value {
+	val := v.val.Index(i)
+	if val.Kind() == reflect.Ptr {
+		val = reflect.Indirect(val)
+	}
+	return val
+}
+
 func (v *valueSorter) Less(i, j int) bool {
-	iVal := v.val.Index(i)
-	jVal := v.val.Index(j)
+	iVal := v.index(i)
+	jVal := v.index(j)
 	return v.less(iVal.Field(v.field).Interface(), jVal.Field(v.field).Interface())
 }
 
 func (v *valueSorter) Swap(i, j int) {
-	iVal := v.val.Index(i).Interface()
-	jVal := v.val.Index(j).Interface()
-	v.val.Index(i).Set(reflect.ValueOf(jVal))
-	v.val.Index(j).Set(reflect.ValueOf(iVal))
+	iVal := v.index(i).Interface()
+	jVal := v.index(j).Interface()
+	v.index(i).Set(reflect.ValueOf(jVal))
+	v.index(j).Set(reflect.ValueOf(iVal))
 }
 
 func getValue(obj interface{}) reflect.Value {
@@ -159,6 +167,9 @@ func newValueSorter(obj interface{}, field string, ascending bool) *valueSorter 
 	val := reflect.ValueOf(obj)
 	typ := reflect.TypeOf(obj)
 	sTyp := typ.Elem()
+	if sTyp.Kind() == reflect.Ptr {
+		sTyp = sTyp.Elem()
+	}
 
 	var index int
 	var fTyp reflect.StructField
@@ -307,11 +318,12 @@ func assertCollectionOfStructs(fnName string, v reflect.Value) {
 	typ := v.Type()
 	kind := typ.Kind()
 	if kind != reflect.Slice && kind != reflect.Array {
-		fatalf(fnName, "slice or an array of structs expected")
+		fatalf(fnName, "slice or an array of structs or pointers to structs expected")
 	}
 	styp := typ.Elem()
-	if styp.Kind() != reflect.Struct {
-		fatalf(fnName, "slice or an array of structs expected")
+	if !(styp.Kind() == reflect.Struct ||
+		(styp.Kind() == reflect.Ptr && styp.Elem().Kind() == reflect.Struct)) {
+		fatalf(fnName, "slice or an array of structs or pointers to structs expected")
 	}
 }
 
@@ -320,6 +332,9 @@ func getTableHeadings(fnName string, v reflect.Value) []tableHeading {
 
 	typ := v.Type()
 	styp := typ.Elem()
+	if styp.Kind() == reflect.Ptr {
+		styp = styp.Elem()
+	}
 
 	var headings []tableHeading
 	for i := 0; i < styp.NumField(); i++ {
@@ -346,6 +361,9 @@ func createTable(v reflect.Value, minWidth, tabWidth, padding int, headings []ta
 
 	for i := 0; i < v.Len(); i++ {
 		el := v.Index(i)
+		if el.Kind() == reflect.Ptr {
+			el = el.Elem()
+		}
 		for _, h := range headings {
 			fmt.Fprintf(w, "%v\t", el.Field(h.index).Interface())
 		}
@@ -384,6 +402,9 @@ func cols(obj interface{}, fields ...string) interface{} {
 	var newFields []reflect.StructField
 	var indicies []int
 	styp := val.Type().Elem()
+	if styp.Kind() == reflect.Ptr {
+		styp = styp.Elem()
+	}
 	for i := 0; i < styp.NumField(); i++ {
 		field := styp.Field(i)
 		if field.PkgPath != "" || ignoreKind(field.Type.Kind()) {
@@ -412,6 +433,9 @@ func cols(obj interface{}, fields ...string) interface{} {
 	newVal := reflect.MakeSlice(reflect.SliceOf(newStyp), val.Len(), val.Len())
 	for i := 0; i < val.Len(); i++ {
 		sval := val.Index(i)
+		if sval.Kind() == reflect.Ptr {
+			sval = sval.Elem()
+		}
 		newSval := reflect.New(newStyp).Elem()
 		for j, origIndex := range indicies {
 			newSval.Field(j).Set(sval.Field(origIndex))

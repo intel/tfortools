@@ -63,6 +63,14 @@ var templateUsageTests = []struct {
 			A int
 		} `test:"tag"`
 	}{}, "struct { X int `test:\"tag\"`; Y []int `test:\"tag\"`; Z map[string]int `test:\"tag\"`; B struct {\nA int\n} `test:\"tag\"`} "},
+	{[]struct {
+		X int
+		Y string
+	}{}, "[]struct { X int; Y string}"},
+	{[]*struct {
+		X int
+		Y string
+	}{}, "[]*struct { X int; Y string}"},
 }
 
 // Check GenerateUsageUndecorated generates the correct output
@@ -186,5 +194,42 @@ func TestBadCols(t *testing.T) {
 	terr := err.(template.ExecError)
 	if terr.Name != "cols" {
 		t.Errorf("terr.Name should be cols")
+	}
+}
+
+// Test tfortools functions work with slice of pointers to structures
+//
+// Sort a slice of pointers to structs, extract two columns, filter by surname,
+// check one of the values, and generate a table.
+//
+// The sort, cols and table function should work fine.  The data extracted
+// should match what is expected.
+func TestSliceOfPointers(t *testing.T) {
+	data := []*struct{ FirstName, MiddleName, Surname string }{
+		{"Marcus", "Tullius", "Cicero"},
+		{"Gaius", "Julius", "Caesar"},
+		{"Marcus", "Licinius", "Crassus"},
+	}
+	script1 := `
+{{- with cols (sort . "MiddleName") "FirstName" "Surname"}}
+  {{- select (filter . "Surname" "Caesar") "FirstName"}}
+{{- end}}`
+	script2 := `{{table .}}`
+
+	var b bytes.Buffer
+	err := OutputToTemplate(&b, "indirect1", script1, data, nil)
+	if err != nil {
+		t.Errorf("Unexpected error processing slice of pointers to structs: %v",
+			err)
+	}
+	found := strings.TrimSpace(b.String())
+	if found != "Gaius" {
+		t.Errorf("Expected Gaius got %s", found)
+	}
+
+	b.Reset()
+	err = OutputToTemplate(ioutil.Discard, "indirect2", script2, data, nil)
+	if err != nil {
+		t.Errorf("Unable to generate a table of pointers to structs: %v", err)
 	}
 }

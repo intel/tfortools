@@ -79,6 +79,9 @@ func generateUsage(buf io.Writer, typ reflect.Type, tag string) {
 	case reflect.Map:
 		fmt.Fprintf(buf, "map[%s]", typ.Key().String())
 		generateUsage(buf, typ.Elem(), tag)
+	case reflect.Ptr:
+		fmt.Fprintf(buf, "*")
+		generateUsage(buf, typ.Elem(), tag)
 	default:
 		fmt.Fprintf(buf, "%s%s\n", typ.String(), tag)
 	}
