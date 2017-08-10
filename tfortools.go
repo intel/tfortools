@@ -92,6 +92,7 @@ const (
 	helpTailIndex
 	helpDescribeIndex
 	helpPromoteIndex
+	helpSliceofIndex
 	helpIndexCount
 )
 
@@ -594,6 +595,19 @@ func OptPromote(c *Config) {
 	}
 	c.funcMap["promote"] = promote
 	c.funcHelp = append(c.funcHelp, funcHelpInfo{helpPromote, helpPromoteIndex})
+}
+
+const helpSliceof = `- 'sliceof' takes one argument and returns a new slice containing only that
+argument.`
+
+// OptSliceof indicates that the 'sliceof' function should be enabled.  'sliceof'
+// takes one argument and returns a new slice containing only that argument.
+func OptSliceof(c *Config) {
+	if _, ok := c.funcMap["sliceof"]; ok {
+		return
+	}
+	c.funcMap["sliceof"] = sliceof
+	c.funcHelp = append(c.funcHelp, funcHelpInfo{helpSliceof, helpSliceofIndex})
 }
 
 // NewConfig creates a new Config object that can be passed to other functions

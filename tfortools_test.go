@@ -130,6 +130,7 @@ func TestOptions(t *testing.T) {
 		OptTail,
 		OptDescribe,
 		OptPromote,
+		OptSliceof,
 	}
 
 	// Check that specifying an option twice does not lead to duplicate help.

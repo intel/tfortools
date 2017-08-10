@@ -36,6 +36,7 @@ var funcMap = template.FuncMap{
 	"tail":            tail,
 	"describe":        describe,
 	"promote":         promote,
+	"sliceof":         sliceof,
 }
 
 var funcHelpSlice = []funcHelpInfo{
@@ -56,6 +57,7 @@ var funcHelpSlice = []funcHelpInfo{
 	{helpTail, helpTailIndex},
 	{helpDescribe, helpDescribeIndex},
 	{helpPromote, helpPromoteIndex},
+	{helpSliceof, helpSliceofIndex},
 }
 
 func getFuncMap(cfg *Config) template.FuncMap {

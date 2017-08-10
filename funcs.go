@@ -588,6 +588,13 @@ func promote(obj interface{}, field string) interface{} {
 	return copy.Interface()
 }
 
+func sliceof(obj interface{}) interface{} {
+	val := reflect.ValueOf(obj)
+	sl := reflect.MakeSlice(reflect.SliceOf(val.Type()), 0, 1)
+	sl = reflect.Append(sl, val)
+	return sl.Interface()
+}
+
 func describe(obj interface{}) string {
 	var buf bytes.Buffer
 	generateIndentedUsage(&buf, obj)

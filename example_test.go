@@ -404,6 +404,15 @@ func ExampleOptPromote() {
 	// Gaius 0000
 }
 
+func ExampleOptSliceof() {
+	script := `{{index (sliceof .) 0}}`
+	if err := OutputToTemplate(os.Stdout, "names", script, 1, nil); err != nil {
+		panic(err)
+	}
+	// output:
+	// 1
+}
+
 func ExampleConfig_AddCustomFn() {
 	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	cfg := NewConfig(OptAllFns)
