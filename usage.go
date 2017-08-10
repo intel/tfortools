@@ -98,8 +98,59 @@ func formatType(buf *bytes.Buffer, unformattedType []byte) {
 	_, _ = buf.Write(formattedType[len(typePrefix):])
 }
 
+func dumpMethods(buf *bytes.Buffer, typ reflect.Type) {
+	var i int
+
+	for i = 0; i < typ.NumMethod(); i++ {
+		if typ.Method(i).PkgPath == "" {
+			break
+		}
+	}
+
+	if i == typ.NumMethod() {
+		return
+	}
+
+	fmt.Fprintf(buf, "\nMethods:\n\n")
+
+	for i = 0; i < typ.NumMethod(); i++ {
+		m := typ.Method(i)
+		if m.PkgPath != "" {
+			continue
+		}
+		typ := m.Type
+
+		fmt.Fprintf(buf, "%s(", m.Name)
+		if typ.NumIn() > 1 {
+			fmt.Fprintf(buf, "%v", typ.In(1))
+			for j := 2; j < typ.NumIn(); j++ {
+				fmt.Fprintf(buf, ", %v", typ.In(j))
+			}
+		}
+		fmt.Fprintf(buf, ")")
+		if typ.NumOut() == 1 {
+			fmt.Fprintf(buf, " %v", typ.Out(0))
+		} else if typ.NumOut() > 1 {
+			fmt.Fprintf(buf, " (")
+			fmt.Fprintf(buf, typ.Out(0).String())
+			for j := 1; j < typ.NumOut(); j++ {
+				fmt.Fprintf(buf, ", %v", typ.Out(j))
+			}
+			fmt.Fprintf(buf, ")")
+		}
+		fmt.Fprintln(buf)
+	}
+}
+
 func generateIndentedUsage(buf *bytes.Buffer, i interface{}) {
 	var source bytes.Buffer
-	generateUsage(&source, reflect.TypeOf(i), "")
+	typ := reflect.TypeOf(i)
+
+	generateUsage(&source, typ, "")
 	formatType(buf, source.Bytes())
+
+	if typ.Kind() != reflect.Ptr {
+		typ = reflect.PtrTo(typ)
+	}
+	dumpMethods(buf, typ)
 }

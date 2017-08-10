@@ -234,3 +234,37 @@ func TestSliceOfPointers(t *testing.T) {
 		t.Errorf("Unable to generate a table of pointers to structs: %v", err)
 	}
 }
+
+type testStruct struct{}
+
+func (t *testStruct) DoSomething() {
+
+}
+
+func (t *testStruct) Get1() string {
+	return ""
+}
+
+func (t *testStruct) Get2() (string, string) {
+	return "", ""
+}
+
+func TestDescribeMethods(t *testing.T) {
+	var buf bytes.Buffer
+
+	expected := `tfortools.testStruct
+
+Methods:
+
+DoSomething()
+Get1() string
+Get2() (string, string)
+`
+	if err := OutputToTemplate(&buf, "names", `{{describe .}}`, testStruct{}, nil); err != nil {
+		panic(err)
+	}
+
+	if buf.String() != expected {
+		t.Errorf("Expected\n%s\ngot\n%s", expected, buf.String())
+	}
+}
