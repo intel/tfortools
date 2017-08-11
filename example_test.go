@@ -246,6 +246,33 @@ func ExampleOptTableX() {
 	// Marcus      Licinius    Crassus
 }
 
+func ExampleOptTableXAlt() {
+	data := []struct {
+		FirstName string
+		Mask      uint32
+	}{
+		{"Marcus", 255},
+		{"Gaius", 10},
+		{"Marcus", 6},
+	}
+
+	script := `{{tablexalt . 12 8 0}}`
+	var b bytes.Buffer
+	if err := OutputToTemplate(&b, "names", script, data, nil); err != nil {
+		panic(err)
+	}
+
+	scanner := bufio.NewScanner(&b)
+	for scanner.Scan() {
+		fmt.Println(strings.TrimSpace(scanner.Text()))
+	}
+	// output:
+	// FirstName   Mask
+	// "Marcus"    0xff
+	// "Gaius"     0xa
+	// "Marcus"    0x6
+}
+
 func ExampleOptCols() {
 	data := []struct{ FirstName, MiddleName, Surname string }{
 		{"Marcus", "Tullius", "Cicero"},
@@ -411,6 +438,16 @@ func ExampleOptSliceof() {
 	}
 	// output:
 	// 1
+}
+
+func ExampleOptSelectAlt() {
+	data := []struct{ Integer uint32 }{{255}}
+	script := `{{selectalt . "Integer"}}`
+	if err := OutputToTemplate(os.Stdout, "names", script, data, nil); err != nil {
+		panic(err)
+	}
+	// output:
+	// 0xff
 }
 
 func ExampleConfig_AddCustomFn() {

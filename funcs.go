@@ -294,7 +294,7 @@ func filterByRegexp(obj interface{}, field, val string) interface{} {
 	})
 }
 
-func selectField(obj interface{}, field string) string {
+func selectFieldBase(obj interface{}, field, format string) string {
 	defer func() {
 		err := recover()
 		if err != nil {
@@ -315,10 +315,18 @@ func selectField(obj interface{}, field string) string {
 
 		f := findField(fieldPath, v)
 
-		fmt.Fprintf(&b, "%v\n", f.Interface())
+		fmt.Fprintf(&b, format+"\n", f.Interface())
 	}
 
 	return string(b.Bytes())
+}
+
+func selectField(obj interface{}, field string) string {
+	return selectFieldBase(obj, field, "%v")
+}
+
+func selectFieldAlt(obj interface{}, field string) string {
+	return selectFieldBase(obj, field, "%#v")
 }
 
 func toJSON(obj interface{}) string {
@@ -366,7 +374,8 @@ func getTableHeadings(fnName string, v reflect.Value) []tableHeading {
 	return headings
 }
 
-func createTable(v reflect.Value, minWidth, tabWidth, padding int, headings []tableHeading) string {
+func createTable(v reflect.Value, minWidth, tabWidth, padding int,
+	format string, headings []tableHeading) string {
 	var b bytes.Buffer
 	w := tabwriter.NewWriter(&b, minWidth, tabWidth, padding, ' ', 0)
 	for _, h := range headings {
@@ -380,7 +389,7 @@ func createTable(v reflect.Value, minWidth, tabWidth, padding int, headings []ta
 			el = el.Elem()
 		}
 		for _, h := range headings {
-			fmt.Fprintf(w, "%v\t", el.Field(h.index).Interface())
+			fmt.Fprintf(w, format+"\t", el.Field(h.index).Interface())
 		}
 		fmt.Fprintln(w)
 	}
@@ -391,10 +400,16 @@ func createTable(v reflect.Value, minWidth, tabWidth, padding int, headings []ta
 
 func table(obj interface{}) string {
 	val := getValue(obj)
-	return createTable(val, 8, 8, 1, getTableHeadings("table", val))
+	return createTable(val, 8, 8, 1, "%v", getTableHeadings("table", val))
 }
 
-func tablex(obj interface{}, minWidth, tabWidth, padding int, userHeadings ...string) string {
+func tableAlt(obj interface{}) string {
+	val := getValue(obj)
+	return createTable(val, 8, 8, 1, "%#v", getTableHeadings("table", val))
+}
+
+func tablexBase(obj interface{}, minWidth, tabWidth, padding int,
+	format string, userHeadings ...string) string {
 	val := getValue(obj)
 	headings := getTableHeadings("tablex", val)
 	if len(headings) < len(userHeadings) {
@@ -404,7 +419,15 @@ func tablex(obj interface{}, minWidth, tabWidth, padding int, userHeadings ...st
 	for i := range userHeadings {
 		headings[i].name = userHeadings[i]
 	}
-	return createTable(val, minWidth, tabWidth, padding, headings)
+	return createTable(val, minWidth, tabWidth, padding, format, headings)
+}
+
+func tablex(obj interface{}, minWidth, tabWidth, padding int, userHeadings ...string) string {
+	return tablexBase(obj, minWidth, tabWidth, padding, "%v", userHeadings...)
+}
+
+func tablexAlt(obj interface{}, minWidth, tabWidth, padding int, userHeadings ...string) string {
+	return tablexBase(obj, minWidth, tabWidth, padding, "%#v", userHeadings...)
 }
 
 func cols(obj interface{}, fields ...string) interface{} {
