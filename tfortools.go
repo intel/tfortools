@@ -66,7 +66,9 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"strings"
 	"text/template"
+	"unicode"
 )
 
 // BUG(markdryan): Map to slice
@@ -133,7 +135,9 @@ func (c *Config) AddCustomFn(fn interface{}, name, helpText string) error {
 		return fmt.Errorf("%s already exists", name)
 	}
 	c.funcMap[name] = fn
+	helpText = strings.TrimRightFunc(helpText, unicode.IsSpace)
 	if helpText != "" {
+		helpText = helpText + "\n"
 		c.funcHelp = append(c.funcHelp, funcHelpInfo{helpText, helpIndexCount})
 	}
 	return nil
@@ -640,7 +644,8 @@ func OptPromote(c *Config) {
 }
 
 const helpSliceof = `- 'sliceof' takes one argument and returns a new slice containing only that
-argument.`
+argument.
+`
 
 // OptSliceof indicates that the 'sliceof' function should be enabled.  'sliceof'
 // takes one argument and returns a new slice containing only that argument.
