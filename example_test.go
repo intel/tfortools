@@ -246,6 +246,33 @@ func ExampleOptTableX() {
 	// Marcus      Licinius    Crassus
 }
 
+func ExampleOptTableXAlt() {
+	data := []struct {
+		FirstName string
+		Mask      uint32
+	}{
+		{"Marcus", 255},
+		{"Gaius", 10},
+		{"Marcus", 6},
+	}
+
+	script := `{{tablexalt . 12 8 0}}`
+	var b bytes.Buffer
+	if err := OutputToTemplate(&b, "names", script, data, nil); err != nil {
+		panic(err)
+	}
+
+	scanner := bufio.NewScanner(&b)
+	for scanner.Scan() {
+		fmt.Println(strings.TrimSpace(scanner.Text()))
+	}
+	// output:
+	// FirstName   Mask
+	// "Marcus"    0xff
+	// "Gaius"     0xa
+	// "Marcus"    0x6
+}
+
 func ExampleOptCols() {
 	data := []struct{ FirstName, MiddleName, Surname string }{
 		{"Marcus", "Tullius", "Cicero"},
@@ -371,6 +398,56 @@ func ExampleOptDescribe() {
 	// 	MiddleName string
 	//	Surname    string
 	// }
+}
+
+func ExampleOptPromote() {
+	type cred struct {
+		Name     string
+		Password string
+	}
+
+	type u struct {
+		Credentials cred
+	}
+
+	data := []struct {
+		Uninteresting int
+		User          u
+	}{
+		{0, u{cred{"Marcus", "1234"}}},
+		{0, u{cred{"Gaius", "0000"}}},
+	}
+
+	// Create a new []cred containing the credentials embedded within data,
+	// iterate through this new slice printing out the names and passwords.
+	// The cred instances rooted at "User.Credentials" in the data object
+	// are promoted to the top level in the new slice.
+	script := `{{range (promote . "User.Credentials")}}{{printf "%s %s\n" .Name .Password}}{{end}}`
+	if err := OutputToTemplate(os.Stdout, "names", script, data, nil); err != nil {
+		panic(err)
+	}
+	// output:
+	// Marcus 1234
+	// Gaius 0000
+}
+
+func ExampleOptSliceof() {
+	script := `{{index (sliceof .) 0}}`
+	if err := OutputToTemplate(os.Stdout, "names", script, 1, nil); err != nil {
+		panic(err)
+	}
+	// output:
+	// 1
+}
+
+func ExampleOptSelectAlt() {
+	data := []struct{ Integer uint32 }{{255}}
+	script := `{{selectalt . "Integer"}}`
+	if err := OutputToTemplate(os.Stdout, "names", script, data, nil); err != nil {
+		panic(err)
+	}
+	// output:
+	// 0xff
 }
 
 func ExampleConfig_AddCustomFn() {

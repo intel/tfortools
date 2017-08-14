@@ -66,7 +66,9 @@ import (
 	"fmt"
 	"io"
 	"sort"
+	"strings"
 	"text/template"
+	"unicode"
 )
 
 // BUG(markdryan): Map to slice
@@ -83,14 +85,19 @@ const (
 	helpFilterRegexpIndex
 	helpToJSONIndex
 	helpSelectIndex
+	helpSelectAltIndex
 	helpTableIndex
+	helpTableAltIndex
 	helpTableXIndex
+	helpTableXAltIndex
 	helpColsIndex
 	helpSortIndex
 	helpRowsIndex
 	helpHeadIndex
 	helpTailIndex
 	helpDescribeIndex
+	helpPromoteIndex
+	helpSliceofIndex
 	helpIndexCount
 )
 
@@ -128,7 +135,9 @@ func (c *Config) AddCustomFn(fn interface{}, name, helpText string) error {
 		return fmt.Errorf("%s already exists", name)
 	}
 	c.funcMap[name] = fn
+	helpText = strings.TrimRightFunc(helpText, unicode.IsSpace)
 	if helpText != "" {
+		helpText = helpText + "\n"
 		c.funcHelp = append(c.funcHelp, funcHelpInfo{helpText, helpIndexCount})
 	}
 	return nil
@@ -311,6 +320,19 @@ func OptSelect(c *Config) {
 	c.funcHelp = append(c.funcHelp, funcHelpInfo{helpSelect, helpSelectIndex})
 }
 
+const helpSelectAlt = `- 'selectalt' Similar to select except that objects are formatted using %#v
+`
+
+// OptSelectAlt indicates that the 'selectalt' function should be enabled.
+// 'selectalt' Similar to select except that objects are formatted using %#v
+func OptSelectAlt(c *Config) {
+	if _, ok := c.funcMap["selectalt"]; ok {
+		return
+	}
+	c.funcMap["selectalt"] = selectFieldAlt
+	c.funcHelp = append(c.funcHelp, funcHelpInfo{helpSelectAlt, helpSelectAltIndex})
+}
+
 const helpTable = `- 'table' outputs a table given an array or a slice of structs.  The table
   headings are taken from the names of the structs fields.  Hidden fields and
   fields of type channel are ignored.  The tabwidth and minimum column width
@@ -332,6 +354,19 @@ func OptTable(c *Config) {
 	}
 	c.funcMap["table"] = table
 	c.funcHelp = append(c.funcHelp, funcHelpInfo{helpTable, helpTableIndex})
+}
+
+const helpTableAlt = `- 'tablealt' Similar to table except that objects are formatted using %#v
+`
+
+// OptTableAlt indicates that the 'tablealt' function should be enabled.
+// 'tablealt' Similar to table except that objects are formatted using %#v
+func OptTableAlt(c *Config) {
+	if _, ok := c.funcMap["tablealt"]; ok {
+		return
+	}
+	c.funcMap["tablealt"] = tableAlt
+	c.funcHelp = append(c.funcHelp, funcHelpInfo{helpTableAlt, helpTableAltIndex})
 }
 
 const helpTableX = `- 'tablex' is similar to table but it allows the caller more control over the
@@ -365,6 +400,19 @@ func OptTableX(c *Config) {
 	}
 	c.funcMap["tablex"] = tablex
 	c.funcHelp = append(c.funcHelp, funcHelpInfo{helpTableX, helpTableXIndex})
+}
+
+const helpTableXAlt = `- 'tablexalt' Similar to tablex except that objects are formatted using %#v
+`
+
+// OptTableXAlt indicates that the 'tablexalt' function should be enabled.
+// 'tablexalt' Similar to tablex except that objects are formatted using %#v
+func OptTableXAlt(c *Config) {
+	if _, ok := c.funcMap["tablexalt"]; ok {
+		return
+	}
+	c.funcMap["tablexalt"] = tablexAlt
+	c.funcHelp = append(c.funcHelp, funcHelpInfo{helpTableXAlt, helpTableXAltIndex})
 }
 
 const helpCols = `- 'cols' can be used to extract certain columns from a table consisting of a
@@ -540,6 +588,73 @@ func OptDescribe(c *Config) {
 	}
 	c.funcMap["describe"] = describe
 	c.funcHelp = append(c.funcHelp, funcHelpInfo{helpDescribe, helpDescribeIndex})
+}
+
+const helpPromote = `- 'promote' takes two arguments, a slice or an array of structures and a field
+  path.  It returns a new slice containing only the objects identified by the
+  field path.  The field path is a period separated list of structure field
+  names.  Promote can be useful to extract a set of objects deep within a data
+  structure into a new slice that can be passed to other functions, e.g., table.
+  For example, given the following type
+ 
+   []struct {
+      uninteresting int
+      user struct {
+          credentials struct {
+              name string
+              password string
+          }
+      }
+  }
+
+  {{promote . "user.credentials"}}
+
+  returns a slice of credentials one for each element of the original top level
+  slice.
+`
+
+// OptPromote indicates that the 'promote' function should be enabled.
+// 'promote' takes two arguments, a slice or an array of structures and a field
+// path.  It returns a new slice containing only the objects identified by the
+// field path.  The field path is a period separated list of structure field
+// names.  Promote can be useful to extract a set of objects deep within a data
+// structure into a new slice that can be passed to other functions, e.g., table.
+// For example, given the following type
+//
+//  []struct {
+//      uninteresting int
+//      user struct {
+//          credentials struct {
+//              name string
+//              password string
+//          }
+//      }
+//  }
+//
+//  {{promote . "user.credentials"}}
+//
+// returns a slice of credentials one for each element of the original top level
+// slice.
+func OptPromote(c *Config) {
+	if _, ok := c.funcMap["promote"]; ok {
+		return
+	}
+	c.funcMap["promote"] = promote
+	c.funcHelp = append(c.funcHelp, funcHelpInfo{helpPromote, helpPromoteIndex})
+}
+
+const helpSliceof = `- 'sliceof' takes one argument and returns a new slice containing only that
+argument.
+`
+
+// OptSliceof indicates that the 'sliceof' function should be enabled.  'sliceof'
+// takes one argument and returns a new slice containing only that argument.
+func OptSliceof(c *Config) {
+	if _, ok := c.funcMap["sliceof"]; ok {
+		return
+	}
+	c.funcMap["sliceof"] = sliceof
+	c.funcHelp = append(c.funcHelp, funcHelpInfo{helpSliceof, helpSliceofIndex})
 }
 
 // NewConfig creates a new Config object that can be passed to other functions
