@@ -1,0 +1,38 @@
+<div class="code" >
+
+<pre  style="font-size: 14px; line-height: 1.1"><span num="29" > func fprintTable(w io.Writer, db []person) error {</span>
+<span num="30">    const header = `&lt;html&gt;</span>
+<span num="31">  &lt;head&gt;</span>
+<span num="32">    &lt;title&gt;Important Contacts&lt;/title&gt;</span>
+<span num="33">  &lt;/head&gt;</span>
+<span num="34">  &lt;body&gt;</span>
+<span num="35">    &lt;table border=1 style=&#34;width:100%%&#34;&gt;</span>
+<span num="36">      &lt;tr&gt;&lt;th&gt;Name&lt;/th&gt;&lt;th&gt;Address&lt;/th&gt;&lt;th&gt;First Number&lt;/th&gt;&lt;th&gt;Second Number&lt;/th&gt;&lt;/tr&gt;</span>
+<span num="37">`</span>
+<span num="38">    if _, err := fmt.Fprintf(w, header); err != nil {</span>
+<span num="39">        return err</span>
+<span num="40">    }</span>
+<span num="41">    for _, p := range db {</span>
+<span num="42">        if _, err := fmt.Fprintf(w, &#34;      &lt;tr&gt;&lt;td&gt;%s %s&lt;/td&gt;&#34;, p.FirstName, p.FamilyName); err != nil {</span>
+<span num="43">            return err</span>
+<span num="44">        }</span>
+<span num="45">        if _, err := fmt.Fprintf(w, &#34;&lt;td&gt;%s %s&lt;/td&gt;&#34;, p.Address.House, p.Address.Street); err != nil {</span>
+<span num="46">            return err</span>
+<span num="47">        }</span>
+<span num="48">        for _, num := range p.PhoneNumbers {</span>
+<span num="49">            if _, err := fmt.Fprintf(w, &#34;&lt;td&gt;%s&lt;/td&gt;&#34;, num); err != nil {</span>
+<span num="50">                return err</span>
+<span num="51">            }</span>
+<span num="52">        }</span>
+<span num="53">        if _, err := fmt.Fprintf(w, &#34;&lt;/tr&gt;\n&#34;); err != nil {</span>
+<span num="54">            return err</span>
+<span num="55">        }</span>
+<span num="56">    }</span>
+<span num="57">    if _, err := fmt.Fprintf(w, &#34;    &lt;/table&gt;\n  &lt;/body&gt;\n&lt;/html&gt;\n&#34;); err != nil {</span>
+<span num="58">        return err</span>
+<span num="59">    }</span>
+<span num="60">    return nil</span>
+<span num="61">}</span>
+</pre>
+
+</div>

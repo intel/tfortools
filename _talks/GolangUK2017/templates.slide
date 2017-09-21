@@ -1,0 +1,206 @@
+Command Line Scripting with Templates
+
+18th August 2017
+
+Mark Ryan
+Software Engineer OTC London
+mark.d.ryan@intel.com
+
+* 
+
+.html title.html
+
+.background filler.png
+
+* An Example
+
+.code table_fmt.go /START OMIT/,/END OMIT/
+
+.play table_fmt.go /START1 OMIT/,/END1 OMIT/
+
+.background background.png
+
+
+* Generate HTML with Go code
+
+.html fprint_table.html
+
+.background background.png
+
+
+* Generate HTML with a Go Template
+
+.play table_templ_hl.go /TEMPLATESTART OMIT/,/TEMPLATEEND OMIT/
+
+.background background.png
+
+
+* Template Primer
+
+Pipelines and Context
+
+.play -edit context.go /START OMIT/,/END OMIT/
+
+.background background.png
+
+Loops
+
+.play -edit loops.go /START OMIT/,/END OMIT/
+
+.background background.png
+
+
+* Template Fun Facts
+
+There are two template packages
+
+.link https://golang.org/pkg/text/template/
+
+.link https://golang.org/pkg/html/template/
+
+Fields operated on by templates need to be exported
+
+.play -edit unexported.go /START OMIT/,/END OMIT/
+
+.background background.png
+
+
+* Template Primer 2
+
+If statements
+
+.play -edit if.go /START OMIT/,/END OMIT/
+
+Indexing maps and slices
+
+.play -edit index.go /START OMIT/,/END OMIT/
+
+.background background.png
+
+* Template Primer 3
+
+Functions
+
+.play -edit functions.go /START OMIT/,/END OMIT/
+
+.background background.png
+
+* 
+
+.html go_list.html
+
+.background filler.png
+
+* Scripting issues
+
+- Keeping help up to date is a nightmare
+.link https://github.com/golang/go/blob/master/src/cmd/go/internal/list/list.go#L25 list.go
+- Extracting information is either too hard or just not possible
+ {{range $i, $v := .Deps}}{{if lt $i 3}}{{println .}}{{end}}{{end}}
+- Converting to JSON is a pain
+- Cannot count elements that match a query
+- Cannot output the last element of a collection
+- Cannot sort the output
+- Pretty printing the output is also a pain
+
+* Templates for Tools
+
+Package to facilitate command line scripting with templates
+.link https://github.com/intel/tfortools https://github.com/intel/tfortools
+
+The package provides
+
+- Automatic generation of help messages
+- Filtering
+- Sorting
+- Data extraction
+- Conversion of selected parts of the data to JSON
+- Pretty printing of data
+
+.background background.png
+
+* Help Messages
+
+.code undecorated.go /STRUCT OMIT/,/STRUCT OMIT/
+
+Undecorated help
+
+.play -edit undecorated.go /START OMIT/,/END OMIT/
+
+Decorated help
+
+.play -edit decorated.go /START OMIT/,/END OMIT/
+
+.background background.png
+
+
+* Formatting
+
+Table
+
+.play -edit table.go /START OMIT/,/END OMIT/
+
+Select
+
+.play -edit select.go /START OMIT/,/END OMIT/
+
+Sort
+
+.play -edit sorting.go /START OMIT/,/END OMIT/
+
+.background background.png
+
+* Extracting
+
+Filter
+
+.play -edit filtering.go /START OMIT/,/END OMIT/
+
+Head and Tail
+
+.play -edit head_tail.go /START OMIT/,/END OMIT/
+
+Row and Cols
+
+.play -edit rows_cols.go /START OMIT/,/END OMIT/
+
+.background background.png
+
+* More Formatting
+
+ToJson
+
+.play -edit tojson.go /START OMIT/,/END OMIT/
+
+Describe
+
+.play -edit describe.go /START OMIT/,/END OMIT/
+
+Promote
+
+.play -edit promote.go /START OMIT/,/END OMIT/
+
+.background background.png
+
+* ELF Dump
+
+.code elf_dump.go /START OMIT/,/END OMIT/
+
+* Guidelines
+
+- Allow users to tailor the output of your tools
+- Always document types passed to template scripts
+- These types constitute a public API
+- Apply templates to entire collections rather than elements of collections
+- Avoid interface{} in your public types
+
+.play -edit empty.go /START OMIT/,/END OMIT/
+
+.background background.png
+
+* 
+
+.html qanda.html
+
+.background filler.png
+
