@@ -27,13 +27,13 @@ import (
 )
 
 type stock struct {
-	Ticker    string
-	Name      string
-	LastTrade time.Time
-	Current   float64
-	High      float64
-	Low       float64
-	Volume    int
+	Ticker    string    `tfortools:"Ticker Symbol"`
+	Name      string    `tfortools:"Stock name"`
+	LastTrade time.Time `tfortools:"Time at which the stock was last traded"`
+	Current   float64   `tfortools:"The current value of the stock"`
+	High      float64   `tfortools:"The highest value the stock has reached today"`
+	Low       float64   `tfortools:"The lowest value the stock has reached today"`
+	Volume    int       `tfortools:"The number of shares traded today"`
 }
 
 // Cols that creates a new type that execludes certain fields from a struct
