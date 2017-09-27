@@ -62,6 +62,53 @@ func ExampleGenerateUsageUndecorated() {
 	// }
 }
 
+func ExampleTemplateFunctionNames() {
+	cfg := NewConfig(OptCols, OptRows)
+	err := cfg.AddCustomFn(strings.TrimSpace, "trim",
+		"- trim trims leading and trailing whitespace from string")
+	if err != nil {
+		panic(err)
+	}
+	for _, fn := range TemplateFunctionNames(cfg) {
+		fmt.Println(fn)
+	}
+	// output:
+	// cols
+	// rows
+	// trim
+}
+
+func ExampleTemplateFunctionHelpSingle() {
+	cfg := NewConfig(OptCols, OptRows)
+	err := cfg.AddCustomFn(strings.TrimSpace, "trim",
+		"- trim trims leading and trailing whitespace from string")
+	if err != nil {
+		panic(err)
+	}
+	help, err := TemplateFunctionHelpSingle("cols", cfg)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(help)
+
+	help, err = TemplateFunctionHelpSingle("trim", cfg)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(help)
+	// output:
+	// - 'cols' can be used to extract certain columns from a table consisting of a
+	//   slice or array of structs.  It returns a new slice of structs which contain
+	//   only the fields requested by the caller.   For example, given a slice of structs
+	//
+	//   {{cols . "Name" "Address"}}
+	//
+	//   returns a new slice of structs, each element of which is a structure with only
+	//   two fields, 'Name' and 'Address'.
+	//
+	// - trim trims leading and trailing whitespace from string
+}
+
 func ExampleOutputToTemplate() {
 	data := []struct{ FirstName, MiddleName, Surname string }{
 		{"Marcus", "Tullius", "Cicero"},
