@@ -761,9 +761,14 @@ func CreateTemplate(name, tmplSrc string, cfg *Config) (*template.Template, erro
 }
 
 // GenerateUsageUndecorated returns a formatted string identifying the
-// elements of the type of object i that can be accessed  from inside a template.
+// elements of the type of object i that can be accessed from inside a template.
 // Unexported struct values and channels are not output as they cannot be usefully
 // accessed inside a template.
+//
+// The output produced by GenerateUsageUndecorated preserves structure tags.
+// There is one special case however.  Tags with a key of "tfortools" are
+// output as comments at the end of the line containing the field, rather
+// than as tags.  This tag can be used to document your structures.
 func GenerateUsageUndecorated(i interface{}) string {
 	var buf bytes.Buffer
 	generateIndentedUsage(&buf, i)

@@ -56,13 +56,13 @@ var templateUsageTests = []struct {
 	{struct{ Empty struct{} }{}, "struct { Empty struct{\n}}"},
 	{struct{}{}, "struct {\n}"},
 	{struct {
-		X int            `test:"tag"`
+		X int            `test:"tag" tfortools:"It's " tfortools:"an \"int\""`
 		Y []int          `test:"tag"`
 		Z map[string]int `test:"tag"`
 		B struct {
-			A int
+			A int `tfortools:"Another int"`
 		} `test:"tag"`
-	}{}, "struct { X int `test:\"tag\"`; Y []int `test:\"tag\"`; Z map[string]int `test:\"tag\"`; B struct {\nA int\n} `test:\"tag\"`} "},
+	}{}, "struct { X int `test:\"tag\"` // It's an \"int\"\n Y []int `test:\"tag\"`; Z map[string]int `test:\"tag\"`; B struct {\nA int // Another int\n} `test:\"tag\"`} "},
 	{[]struct {
 		X int
 		Y string

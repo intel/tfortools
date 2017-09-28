@@ -48,8 +48,8 @@ func ExampleGenerateUsageDecorated() {
 
 func ExampleGenerateUsageUndecorated() {
 	i := struct {
-		X       int
-		Y       string
+		X       int    `tfortools:"This is an int"`
+		Y       string `json:"omitempty" tfortools:"This is a string"`
 		hidden  float64
 		Invalid chan int
 	}{}
@@ -57,8 +57,8 @@ func ExampleGenerateUsageUndecorated() {
 	fmt.Println(help)
 	// output:
 	// struct {
-	// 	X int
-	// 	Y string
+	// 	X int    // This is an int
+	// 	Y string `json:"omitempty"` // This is a string
 	// }
 }
 
