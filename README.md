@@ -1,4 +1,4 @@
-# Template for Tools
+# Templates for Tools
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/intel/tfortools)](https://goreportcard.com/report/github.com/intel/tfortools)
 [![Build Status](https://travis-ci.org/intel/tfortools.svg?branch=master)](https://travis-ci.org/intel/tfortools)
