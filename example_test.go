@@ -487,6 +487,25 @@ func ExampleOptSliceof() {
 	// 1
 }
 
+func ExampleOptToTable() {
+	data := [][]string{
+		{"Message", "Code", "Occurrence"},
+		{"Too many GOSUBs", "37", "0.1"},
+		{"Too many REPEATs", "44", "0.15"},
+	}
+	script := `{{with (totable .)}}{{select . "Message"}}{{select . "Code"}}{{select . "Occurrence"}}{{end}}`
+	if err := OutputToTemplate(os.Stdout, "errors", script, data, nil); err != nil {
+		panic(err)
+	}
+	// output:
+	// Too many GOSUBs
+	// Too many REPEATs
+	// 37
+	// 44
+	// 0.1
+	// 0.15
+}
+
 func ExampleOptSelectAlt() {
 	data := []struct{ Integer uint32 }{{255}}
 	script := `{{selectalt . "Integer"}}`

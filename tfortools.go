@@ -98,6 +98,7 @@ const (
 	helpDescribeIndex
 	helpPromoteIndex
 	helpSliceofIndex
+	helpToTableIndex
 	helpIndexCount
 )
 
@@ -666,6 +667,33 @@ func OptSliceof(c *Config) {
 	}
 	c.funcMap["sliceof"] = sliceof
 	c.funcHelp = append(c.funcHelp, funcHelpInfo{"sliceof", helpSliceof, helpSliceofIndex})
+}
+
+const helpToTable = `- 'totable' converts a slice of a slice of strings into a slice of
+  structures.  The field names of the structures are taken from the values of
+  the first row in the slice.  The types of the fields are derived from the
+  values specified in the second row.  The input slice should be of length 2
+  or greater.  Data in columns in the second and subsequent rows should be
+  homogenous.  The elements of the first row should be unique and ideally be
+  valid exported variable names.  'totable' will try to sanitize the field
+  names, if they are not valid go identifiers.
+`
+
+// OptToTable indicates that the 'totable' function should be enabled. 'totable'
+// takes a slice of a slice of strings as an argument and returns a slice of
+// structures.  The field names of the structures are taken from the values of
+// the first row in the slice.  The types of the fields are derived from the
+// values specified in the second row.  The input slice should be of length 2
+// or greater.  Data in columns in the second and subsequent rows should be
+// homogenous.  The elements of the first row should be unique and ideally
+// be valid exported variable names.  'totable' will try to sanitize the field
+// names, if they are not valid go identifiers.
+func OptToTable(c *Config) {
+	if _, ok := c.funcMap["totable"]; ok {
+		return
+	}
+	c.funcMap["totable"] = toTable
+	c.funcHelp = append(c.funcHelp, funcHelpInfo{"totable", helpToTable, helpToTableIndex})
 }
 
 // NewConfig creates a new Config object that can be passed to other functions
