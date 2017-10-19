@@ -18,6 +18,7 @@ package tfortools
 
 import (
 	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -338,6 +339,54 @@ func toJSON(obj interface{}) string {
 		return ""
 	}
 	return string(b)
+}
+
+func toCSV(obj interface{}, skipHeader ...bool) string {
+	var data [][]string
+	var buf bytes.Buffer
+
+	data, ok := obj.([][]string)
+	if ok {
+		_ = csv.NewWriter(&buf).WriteAll(data)
+		return buf.String()
+	}
+
+	assertCollectionOfStructs("toCSV", reflect.ValueOf(obj))
+	v := reflect.ValueOf(obj)
+	data = make([][]string, 0, v.Len()+1)
+	if len(skipHeader) == 0 || !skipHeader[0] {
+		styp := v.Type().Elem()
+		if styp.Kind() == reflect.Ptr {
+			styp = styp.Elem()
+		}
+		var row []string
+		for i := 0; i < styp.NumField(); i++ {
+			field := styp.Field(i)
+			if field.PkgPath != "" {
+				continue
+			}
+			row = append(row, field.Name)
+		}
+		data = append(data, row)
+	}
+	for i := 0; i < v.Len(); i++ {
+		var row []string
+		s := v.Index(i)
+		if s.Kind() == reflect.Ptr {
+			s = s.Elem()
+		}
+		for j := 0; j < s.NumField(); j++ {
+			field := s.Field(j)
+			if s.Type().Field(j).PkgPath != "" {
+				continue
+			}
+			row = append(row, fmt.Sprintf("%v", field.Interface()))
+		}
+		data = append(data, row)
+	}
+
+	_ = csv.NewWriter(&buf).WriteAll(data)
+	return buf.String()
 }
 
 func assertCollectionOfStructs(fnName string, v reflect.Value) {

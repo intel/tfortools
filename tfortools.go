@@ -84,6 +84,7 @@ const (
 	helpFilterFoldedIndex
 	helpFilterRegexpIndex
 	helpToJSONIndex
+	helpToCSVIndex
 	helpSelectIndex
 	helpSelectAltIndex
 	helpTableIndex
@@ -303,6 +304,31 @@ func OptToJSON(c *Config) {
 	}
 	c.funcMap["tojson"] = toJSON
 	c.funcHelp = append(c.funcHelp, funcHelpInfo{"tojson", helpToJSON, helpToJSONIndex})
+}
+
+const helpToCSV = `- 'tocsv' converts a [][]string or a slice of structs to csv format, e.g.,
+  {{tocsv .}}
+
+  'tocsv' takes an optional boolean parameter, which if true, omits the
+  first row containing the structure field name derived column headings.
+  This boolean parameter defaults to false and is ignored when operating
+  on a [][]string.
+`
+
+// OptToCSV indicates that the 'tocsv' function should be enabled.
+// 'tocsv' converts a [][]string or a slice of structs to csv format, e.g.,
+// {{tocsv .}}
+//
+// 'tocsv' takes an optional boolean parameter, which if true, omits the
+// first row containing the structure field name derived column headings.
+// This boolean parameter defaults to false and is ignored when operating
+// on a [][]string.
+func OptToCSV(c *Config) {
+	if _, ok := c.funcMap["tocsv"]; ok {
+		return
+	}
+	c.funcMap["tocsv"] = toCSV
+	c.funcHelp = append(c.funcHelp, funcHelpInfo{"tocsv", helpToCSV, helpToCSVIndex})
 }
 
 const helpSelect = `- 'select' operates on a slice of structs.  It outputs the value of a specified

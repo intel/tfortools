@@ -121,6 +121,7 @@ func TestOptions(t *testing.T) {
 		OptFilterFolded,
 		OptFilterRegexp,
 		OptToJSON,
+		OptToCSV,
 		OptSelect,
 		OptSelectAlt,
 		OptTable,
