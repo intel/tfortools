@@ -26,6 +26,7 @@ var funcMap = template.FuncMap{
 	"filterFolded":    filterByFolded,
 	"filterRegexp":    filterByRegexp,
 	"tojson":          toJSON,
+	"tocsv":           toCSV,
 	"select":          selectField,
 	"selectalt":       selectFieldAlt,
 	"table":           table,
@@ -40,6 +41,7 @@ var funcMap = template.FuncMap{
 	"describe":        describe,
 	"promote":         promote,
 	"sliceof":         sliceof,
+	"totable":         toTable,
 }
 
 var funcHelpSlice = []funcHelpInfo{
@@ -50,6 +52,7 @@ var funcHelpSlice = []funcHelpInfo{
 	{"filterFolded", helpFilterFolded, helpFilterFoldedIndex},
 	{"filterRegexp", helpFilterRegexp, helpFilterRegexpIndex},
 	{"tojson", helpToJSON, helpToJSONIndex},
+	{"tocsv", helpToCSV, helpToCSVIndex},
 	{"select", helpSelect, helpSelectIndex},
 	{"selectalt", helpSelectAlt, helpSelectAltIndex},
 	{"table", helpTable, helpTableIndex},
@@ -64,6 +67,7 @@ var funcHelpSlice = []funcHelpInfo{
 	{"describe", helpDescribe, helpDescribeIndex},
 	{"promote", helpPromote, helpPromoteIndex},
 	{"sliceof", helpSliceof, helpSliceofIndex},
+	{"totable", helpToTable, helpToTableIndex},
 }
 
 func getFuncMap(cfg *Config) template.FuncMap {

@@ -84,6 +84,7 @@ const (
 	helpFilterFoldedIndex
 	helpFilterRegexpIndex
 	helpToJSONIndex
+	helpToCSVIndex
 	helpSelectIndex
 	helpSelectAltIndex
 	helpTableIndex
@@ -98,6 +99,7 @@ const (
 	helpDescribeIndex
 	helpPromoteIndex
 	helpSliceofIndex
+	helpToTableIndex
 	helpIndexCount
 )
 
@@ -302,6 +304,31 @@ func OptToJSON(c *Config) {
 	}
 	c.funcMap["tojson"] = toJSON
 	c.funcHelp = append(c.funcHelp, funcHelpInfo{"tojson", helpToJSON, helpToJSONIndex})
+}
+
+const helpToCSV = `- 'tocsv' converts a [][]string or a slice of structs to csv format, e.g.,
+  {{tocsv .}}
+
+  'tocsv' takes an optional boolean parameter, which if true, omits the
+  first row containing the structure field name derived column headings.
+  This boolean parameter defaults to false and is ignored when operating
+  on a [][]string.
+`
+
+// OptToCSV indicates that the 'tocsv' function should be enabled.
+// 'tocsv' converts a [][]string or a slice of structs to csv format, e.g.,
+// {{tocsv .}}
+//
+// 'tocsv' takes an optional boolean parameter, which if true, omits the
+// first row containing the structure field name derived column headings.
+// This boolean parameter defaults to false and is ignored when operating
+// on a [][]string.
+func OptToCSV(c *Config) {
+	if _, ok := c.funcMap["tocsv"]; ok {
+		return
+	}
+	c.funcMap["tocsv"] = toCSV
+	c.funcHelp = append(c.funcHelp, funcHelpInfo{"tocsv", helpToCSV, helpToCSVIndex})
 }
 
 const helpSelect = `- 'select' operates on a slice of structs.  It outputs the value of a specified
@@ -666,6 +693,33 @@ func OptSliceof(c *Config) {
 	}
 	c.funcMap["sliceof"] = sliceof
 	c.funcHelp = append(c.funcHelp, funcHelpInfo{"sliceof", helpSliceof, helpSliceofIndex})
+}
+
+const helpToTable = `- 'totable' converts a slice of a slice of strings into a slice of
+  structures.  The field names of the structures are taken from the values of
+  the first row in the slice.  The types of the fields are derived from the
+  values specified in the second row.  The input slice should be of length 2
+  or greater.  Data in columns in the second and subsequent rows should be
+  homogenous.  The elements of the first row should be unique and ideally be
+  valid exported variable names.  'totable' will try to sanitize the field
+  names, if they are not valid go identifiers.
+`
+
+// OptToTable indicates that the 'totable' function should be enabled. 'totable'
+// takes a slice of a slice of strings as an argument and returns a slice of
+// structures.  The field names of the structures are taken from the values of
+// the first row in the slice.  The types of the fields are derived from the
+// values specified in the second row.  The input slice should be of length 2
+// or greater.  Data in columns in the second and subsequent rows should be
+// homogenous.  The elements of the first row should be unique and ideally
+// be valid exported variable names.  'totable' will try to sanitize the field
+// names, if they are not valid go identifiers.
+func OptToTable(c *Config) {
+	if _, ok := c.funcMap["totable"]; ok {
+		return
+	}
+	c.funcMap["totable"] = toTable
+	c.funcHelp = append(c.funcHelp, funcHelpInfo{"totable", helpToTable, helpToTableIndex})
 }
 
 // NewConfig creates a new Config object that can be passed to other functions

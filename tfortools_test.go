@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math/rand"
+	"reflect"
 	"strings"
 	"testing"
 	"text/template"
@@ -120,6 +121,7 @@ func TestOptions(t *testing.T) {
 		OptFilterFolded,
 		OptFilterRegexp,
 		OptToJSON,
+		OptToCSV,
 		OptSelect,
 		OptSelectAlt,
 		OptTable,
@@ -134,6 +136,7 @@ func TestOptions(t *testing.T) {
 		OptDescribe,
 		OptPromote,
 		OptSliceof,
+		OptToTable,
 	}
 
 	// Check that specifying an option twice does not lead to duplicate help.
@@ -237,6 +240,68 @@ func TestSliceOfPointers(t *testing.T) {
 	if err != nil {
 		t.Errorf("Unable to generate a table of pointers to structs: %v", err)
 	}
+}
+
+func testToTableInvalid(t *testing.T, data [][]string) {
+	defer func() {
+		err := recover()
+		if err == nil {
+			t.Errorf("Expected totable %v to fail", data)
+		} else if _, ok := err.(template.ExecError); !ok {
+			t.Errorf("Unexpected error type %T", err)
+		}
+	}()
+
+	_ = toTable(data)
+}
+
+func TestToTable(t *testing.T) {
+	data := [][]string{
+		{"lowercase", " Contains Spaces ", "*invalid_char", "1_num_start"},
+		{"A", "B", "10", "10.5"},
+	}
+	fieldNames := []string{"Lowercase", "Contains_Spaces", "X_invalid_char", "X1_num_start"}
+	fieldTypes := []reflect.Type{reflect.TypeOf(""), reflect.TypeOf(""), reflect.TypeOf(10),
+		reflect.TypeOf(10.5)}
+	res := toTable(data)
+	if res == nil {
+		t.Errorf("Expected slice of structures, got 0 element slice")
+	}
+	typ := reflect.ValueOf(res).Index(0).Type()
+	for i, fname := range fieldNames {
+		field := typ.Field(i)
+		if field.Name != fname {
+			t.Errorf("Unexpected structure name, wanted %s got %s",
+				fname, field.Name)
+		}
+		if field.Type != fieldTypes[i] {
+			t.Errorf("Unexpected field type, wanted %s got %s",
+				fieldTypes[i], field.Type)
+		}
+	}
+
+	// Test invalid input
+
+	testToTableInvalid(t, [][]string{
+		{"lowercase", " Contains Spaces ", "*invalid_char", "1_num_start"},
+		{"A", "B", "10", "10.5"},
+		{"A", "B", "i'm a string", "10.5"},
+	})
+
+	testToTableInvalid(t, nil)
+
+	testToTableInvalid(t, [][]string{
+		{"lowercase", "lowercase", "*invalid_char", "1_num_start"},
+		{"A", "B", "10", "10.5"},
+		{"A", "B", "i'm a string", "10.5"},
+	})
+
+	testToTableInvalid(t, [][]string{
+		{"", "lowercase", "*invalid_char", "1_num_start"},
+		{"A", "B", "10", "10.5"},
+		{"A", "B", "i'm a string", "10.5"},
+	})
+
 }
 
 type testStruct struct{}

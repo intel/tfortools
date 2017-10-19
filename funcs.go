@@ -18,14 +18,18 @@ package tfortools
 
 import (
 	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"reflect"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"text/tabwriter"
 	"text/template"
+	"unicode"
+	"unicode/utf8"
 )
 
 type tableHeading struct {
@@ -337,6 +341,54 @@ func toJSON(obj interface{}) string {
 	return string(b)
 }
 
+func toCSV(obj interface{}, skipHeader ...bool) string {
+	var data [][]string
+	var buf bytes.Buffer
+
+	data, ok := obj.([][]string)
+	if ok {
+		_ = csv.NewWriter(&buf).WriteAll(data)
+		return buf.String()
+	}
+
+	assertCollectionOfStructs("toCSV", reflect.ValueOf(obj))
+	v := reflect.ValueOf(obj)
+	data = make([][]string, 0, v.Len()+1)
+	if len(skipHeader) == 0 || !skipHeader[0] {
+		styp := v.Type().Elem()
+		if styp.Kind() == reflect.Ptr {
+			styp = styp.Elem()
+		}
+		var row []string
+		for i := 0; i < styp.NumField(); i++ {
+			field := styp.Field(i)
+			if field.PkgPath != "" {
+				continue
+			}
+			row = append(row, field.Name)
+		}
+		data = append(data, row)
+	}
+	for i := 0; i < v.Len(); i++ {
+		var row []string
+		s := v.Index(i)
+		if s.Kind() == reflect.Ptr {
+			s = s.Elem()
+		}
+		for j := 0; j < s.NumField(); j++ {
+			field := s.Field(j)
+			if s.Type().Field(j).PkgPath != "" {
+				continue
+			}
+			row = append(row, fmt.Sprintf("%v", field.Interface()))
+		}
+		data = append(data, row)
+	}
+
+	_ = csv.NewWriter(&buf).WriteAll(data)
+	return buf.String()
+}
+
 func assertCollectionOfStructs(fnName string, v reflect.Value) {
 	typ := v.Type()
 	kind := typ.Kind()
@@ -622,4 +674,92 @@ func describe(obj interface{}) string {
 	var buf bytes.Buffer
 	generateIndentedUsage(&buf, obj)
 	return buf.String()
+}
+
+func sanitizeName(name string) string {
+	var buf bytes.Buffer
+
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return name
+	}
+
+	rune, len := utf8.DecodeRuneInString(name)
+	if !unicode.IsLetter(rune) {
+		_, _ = buf.WriteRune('X')
+	} else {
+		_, _ = buf.WriteRune(unicode.ToTitle(rune))
+		name = name[len:]
+	}
+
+	for _, rune := range name {
+		if !unicode.IsLetter(rune) && !unicode.IsDigit(rune) {
+			rune = '_'
+		}
+		_, _ = buf.WriteRune(rune)
+	}
+
+	return buf.String()
+}
+
+func guessType(v string) reflect.Type {
+	if p, err := strconv.Atoi(v); err == nil {
+		return reflect.TypeOf(p)
+	}
+	if p, err := strconv.ParseFloat(v, 64); err == nil {
+		return reflect.TypeOf(p)
+	}
+	return reflect.TypeOf("")
+}
+
+func toTable(data [][]string) interface{} {
+	defer func() {
+		err := recover()
+		if err != nil {
+			fatalf("promote", "Invalid use of toTable: %v", err)
+		}
+	}()
+
+	if len(data) < 2 {
+		panic("Expected at least two rows")
+	}
+
+	var fields []reflect.StructField
+	for _, f := range data[0] {
+		fields = append(fields, reflect.StructField{
+			Name: sanitizeName(f),
+		})
+	}
+
+	for i, v := range data[1] {
+		fields[i].Type = guessType(v)
+	}
+
+	sTyp := reflect.StructOf(fields)
+	newVal := reflect.MakeSlice(reflect.SliceOf(sTyp), len(data)-1, len(data)-1)
+	for i, row := range data[1:] {
+		sVal := reflect.New(sTyp)
+		for j, v := range row {
+			f := sVal.Elem().Field(j)
+			switch f.Kind() {
+			case reflect.Int:
+				num, err := strconv.Atoi(v)
+				if err != nil {
+					panic(fmt.Sprintf("integer expected found %s at (%d, %d)", v, j, i))
+				}
+				f.Set(reflect.ValueOf(num))
+			case reflect.Float64:
+				num, err := strconv.ParseFloat(v, 64)
+				if err != nil {
+					panic(fmt.Sprintf("float expected found %s at (%d, %d)", v, j, i))
+				}
+				f.Set(reflect.ValueOf(num))
+			default:
+				f.Set(reflect.ValueOf(v))
+			}
+		}
+		newVal.Index(i).Set(sVal.Elem())
+	}
+
+	return newVal.Interface()
 }
