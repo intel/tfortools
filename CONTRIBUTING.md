@@ -53,19 +53,8 @@ We accept github pull requests.
 We request you give quality assurance some consideration by:
 
 * Adding go unit tests for changes where it makes sense.
-* Enabling [Travis CI](https://travis-ci.org/01org/tfortools) on your github fork of Templates for Tools to get continuous integration feedback on your dev/test branches.
+* Enabling [Travis CI](https://travis-ci.org/intel/tfortools) on your github fork of Templates for Tools to get continuous integration feedback on your dev/test branches.
 
 ## Issue tracking
 
-If you have a problem, please let us know.  IRC #ciao-project on [Freenode](https://freenode.net/kb/answer/chat)
-is a perfectly fine place
-to quickly informally bring something up, if you get a response.  The
-[mailing list](https://lists.clearlinux.org/mailman/listinfo/ciao-devel)
-is a more durable communication channel.
-
-If it's a bug not already documented, by all means please [open an
-issue in github](https://github.com/01org/intel/tfortools/issues/new) so we all get visibility
-the problem and work toward resolution.
-
-For feature requests we're also using github issues, with the label
-"enhancement".
+If you find a bug please [open a github issue](https://github.com/intel/tfortools/issues/new).
