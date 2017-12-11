@@ -320,6 +320,70 @@ func ExampleOptTableXAlt() {
 	// "Marcus"    0x6
 }
 
+func ExampleOptHTableX() {
+	data := []struct{ FirstName, MiddleName, Surname string }{
+		{"Marcus", "Tullius", "Cicero"},
+		{"Gaius", "Julius", "Caesar"},
+		{"Marcus", "Licinius", "Crassus"},
+	}
+
+	// Output the names of people in a series of nicely formatted tables
+	script := `{{htablex . 12 8 0}}`
+	var b bytes.Buffer
+	if err := OutputToTemplate(&b, "names", script, data, nil); err != nil {
+		panic(err)
+	}
+
+	scanner := bufio.NewScanner(&b)
+	for scanner.Scan() {
+		fmt.Println(strings.TrimSpace(scanner.Text()))
+	}
+	// output:
+	// FirstName:  Marcus
+	// MiddleName: Tullius
+	// Surname:    Cicero
+	//
+	// FirstName:  Gaius
+	// MiddleName: Julius
+	// Surname:    Caesar
+	//
+	// FirstName:  Marcus
+	// MiddleName: Licinius
+	// Surname:    Crassus
+}
+
+func ExampleOptHTableXAlt() {
+	data := []struct {
+		FirstName string
+		Mask      uint32
+	}{
+		{"Marcus", 255},
+		{"Gaius", 10},
+		{"Marcus", 6},
+	}
+
+	script := `{{htablexalt . 12 8 0}}`
+	var b bytes.Buffer
+	if err := OutputToTemplate(&b, "names", script, data, nil); err != nil {
+		panic(err)
+	}
+
+	scanner := bufio.NewScanner(&b)
+	for scanner.Scan() {
+		fmt.Println(strings.TrimSpace(scanner.Text()))
+	}
+
+	// output:
+	// FirstName:  "Marcus"
+	// Mask:       0xff
+	//
+	// FirstName:  "Gaius"
+	// Mask:       0xa
+	//
+	// FirstName:  "Marcus"
+	// Mask:       0x6
+}
+
 func ExampleOptCols() {
 	data := []struct{ FirstName, MiddleName, Surname string }{
 		{"Marcus", "Tullius", "Cicero"},
