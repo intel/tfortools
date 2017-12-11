@@ -450,6 +450,29 @@ func createTable(v reflect.Value, minWidth, tabWidth, padding int,
 	return b.String()
 }
 
+func createHTable(v reflect.Value, minWidth, tabWidth, padding int,
+	format string, headings []tableHeading) string {
+	var b bytes.Buffer
+	w := tabwriter.NewWriter(&b, minWidth, tabWidth, padding, ' ', 0)
+	for i := 0; i < v.Len(); i++ {
+		if i > 0 {
+			fmt.Fprintln(w)
+		}
+		for _, h := range headings {
+			fmt.Fprintf(w, "%s:\t", h.name)
+			el := v.Index(i)
+			if el.Kind() == reflect.Ptr {
+				el = el.Elem()
+			}
+			fmt.Fprintf(w, format+"\t", el.Field(h.index).Interface())
+			fmt.Fprintln(w)
+		}
+	}
+	_ = w.Flush()
+
+	return b.String()
+}
+
 func table(obj interface{}) string {
 	val := getValue(obj)
 	return createTable(val, 8, 8, 1, "%v", getTableHeadings("table", val))
@@ -460,26 +483,50 @@ func tableAlt(obj interface{}) string {
 	return createTable(val, 8, 8, 1, "%#v", getTableHeadings("table", val))
 }
 
-func tablexBase(obj interface{}, minWidth, tabWidth, padding int,
-	format string, userHeadings ...string) string {
-	val := getValue(obj)
-	headings := getTableHeadings("tablex", val)
+func xHeadings(fnName string, val reflect.Value, userHeadings []string) []tableHeading {
+	headings := getTableHeadings(fnName, val)
 	if len(headings) < len(userHeadings) {
-		fatalf("tablex", "Too many headings specified.  Max permitted %d got %d",
+		fatalf(fnName, "Too many headings specified.  Max permitted %d got %d",
 			len(headings), len(userHeadings))
 	}
 	for i := range userHeadings {
 		headings[i].name = userHeadings[i]
 	}
-	return createTable(val, minWidth, tabWidth, padding, format, headings)
+	return headings
 }
 
 func tablex(obj interface{}, minWidth, tabWidth, padding int, userHeadings ...string) string {
-	return tablexBase(obj, minWidth, tabWidth, padding, "%v", userHeadings...)
+	val := getValue(obj)
+	headings := xHeadings("tablex", val, userHeadings)
+	return createTable(val, minWidth, tabWidth, padding, "%v", headings)
 }
 
 func tablexAlt(obj interface{}, minWidth, tabWidth, padding int, userHeadings ...string) string {
-	return tablexBase(obj, minWidth, tabWidth, padding, "%#v", userHeadings...)
+	val := getValue(obj)
+	headings := xHeadings("tablexalt", val, userHeadings)
+	return createTable(val, minWidth, tabWidth, padding, "%#v", headings)
+}
+
+func htable(obj interface{}) string {
+	val := getValue(obj)
+	return createHTable(val, 8, 8, 1, "%v", getTableHeadings("htable", val))
+}
+
+func htableAlt(obj interface{}) string {
+	val := getValue(obj)
+	return createHTable(val, 8, 8, 1, "%#v", getTableHeadings("htablealt", val))
+}
+
+func htablex(obj interface{}, minWidth, tabWidth, padding int, userHeadings ...string) string {
+	val := getValue(obj)
+	headings := xHeadings("htablex", val, userHeadings)
+	return createHTable(val, minWidth, tabWidth, padding, "%v", headings)
+}
+
+func htablexAlt(obj interface{}, minWidth, tabWidth, padding int, userHeadings ...string) string {
+	val := getValue(obj)
+	headings := xHeadings("htablexalt", val, userHeadings)
+	return createHTable(val, minWidth, tabWidth, padding, "%#v", headings)
 }
 
 func cols(obj interface{}, fields ...string) interface{} {

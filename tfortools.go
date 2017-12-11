@@ -91,6 +91,10 @@ const (
 	helpTableAltIndex
 	helpTableXIndex
 	helpTableXAltIndex
+	helpHTableIndex
+	helpHTableAltIndex
+	helpHTableXIndex
+	helpHTableXAltIndex
 	helpColsIndex
 	helpSortIndex
 	helpRowsIndex
@@ -450,6 +454,92 @@ func OptTableXAlt(c *Config) {
 	c.funcMap["tablexalt"] = tablexAlt
 	c.funcHelp = append(c.funcHelp,
 		funcHelpInfo{"tablexalt", helpTableXAlt, helpTableXAltIndex})
+}
+
+const helpHTable = `- 'htable' outputs each element of an array or a slice of structs
+  in its own two column table.  The values for the first column are taken from
+  the names of the structs' fields.  The second column contains the field values.
+  Hidden fields and fields of type channel are ignored. The tabwidth and minimum
+  column width are hardcoded to 8.  An example of htable's usage is
+
+  {{htable .}}
+`
+
+// OptHTable indicates that the 'htable' function should be enabled.
+// 'htable' outputs each element of an array or a slice of structs in its own
+// two column table.  The values for the first column are taken from
+// the names of the structs' fields.  The second column contains the field values.
+// Hidden fields and fields of type channel are ignored. The tabwidth and minimum
+// column width are hardcoded to 8.  An example of htable's usage is
+//
+//  {{htable .}}
+func OptHTable(c *Config) {
+	if _, ok := c.funcMap["htable"]; ok {
+		return
+	}
+	c.funcMap["htable"] = htable
+	c.funcHelp = append(c.funcHelp, funcHelpInfo{"htable", helpHTable, helpHTableIndex})
+}
+
+const helpHTableAlt = `- 'htablealt' Similar to htable except that objects are formatted using %#v
+`
+
+// OptHTableAlt indicates that the 'htablealt' function should be enabled.
+// 'htablealt' Similar to table except that objects are formatted using %#v
+func OptHTableAlt(c *Config) {
+	if _, ok := c.funcMap["htablealt"]; ok {
+		return
+	}
+	c.funcMap["htablealt"] = htableAlt
+	c.funcHelp = append(c.funcHelp,
+		funcHelpInfo{"htablealt", helpHTableAlt, helpHTableAltIndex})
+}
+
+const helpHTableX = `- 'htablex' is similar to htable but it allows the caller more control over the
+  tables' appearances.  Users can control the names displayed in the first column
+  and also set the tab and column width.  'htablex' takes 4 or more parameters.
+  The first parameter is the slice of structs to output, the second is the minimum
+  column width, the third the tab width  and the fourth is the padding.  The
+  fifth and subsequent parameters are the values displayed in the first column
+  of each table.  These first column values are optional and the field names of
+  the structures will be used if they are absent.  Example of its usage are:
+
+  {{htablex . 12 8 1 "Field 1" "Field 2"}}
+  {{htablex . 8 8 1}}
+`
+
+// OptHTableX indicates that the 'htablex' function should be enabled.  'htablex'
+// is similar to htable but it allows the caller more control over the
+// tables' appearances.  Users can control the names displayed in the first column
+// and also set the tab and column width.  'htablex' takes 4 or more parameters.
+// The first parameter is the slice of structs to output, the second is the minimum
+// column width, the third the tab width  and the fourth is the padding.  The
+// fifth and subsequent parameters are the values displayed in the first column of
+// each table.  These first column values are optional and the field names of the
+// structures will be used if they are absent.  Example of its usage are:
+//
+//  {{htablex . 12 8 1 "Field 1" "Field 2"}}
+//  {{htablex . 8 8 1}}
+func OptHTableX(c *Config) {
+	if _, ok := c.funcMap["htablex"]; ok {
+		return
+	}
+	c.funcMap["htablex"] = htablex
+	c.funcHelp = append(c.funcHelp, funcHelpInfo{"htablex", helpHTableX, helpHTableXIndex})
+}
+
+const helpHTableXAlt = `- 'htablexalt' Similar to htablex except that objects are formatted using %#v
+`
+
+// OptHTableXAlt indicates that the 'htablexalt' function should be enabled.
+// 'htablexalt' Similar to htablex except that objects are formatted using %#v
+func OptHTableXAlt(c *Config) {
+	if _, ok := c.funcMap["htablexalt"]; ok {
+		return
+	}
+	c.funcMap["htablexalt"] = htablexAlt
+	c.funcHelp = append(c.funcHelp,
+		funcHelpInfo{"htablexalt", helpHTableXAlt, helpHTableXAltIndex})
 }
 
 const helpCols = `- 'cols' can be used to extract certain columns from a table consisting of a
