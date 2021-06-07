@@ -885,10 +885,7 @@ func OutputToTemplate(w io.Writer, name, tmplSrc string, obj interface{}, cfg *C
 	if err != nil {
 		return err
 	}
-	if err = t.Execute(w, obj); err != nil {
-		return err
-	}
-	return nil
+	return t.Execute(w, obj)
 }
 
 // CreateTemplate creates a new template, whose source is contained within the
