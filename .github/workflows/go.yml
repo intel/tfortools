@@ -23,3 +23,10 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+
+    - name: Install golang-ci-lint
+      run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.40.1
+
+    - name: golang-ci-lint
+      run: golangci-lint run --tests --disable-all --enable=misspell --enable=vet --enable=ineffassign --enable=gofmt --enable=gocyclo  --enable=golint --enable=errcheck --enable=deadcode ./...
+
